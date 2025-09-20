@@ -1,80 +1,162 @@
-/* Google Font */
+/* ================================ General Page Styles ================================ */
 body {
   font-family: 'Roboto', sans-serif;
   margin: 0;
+  padding: 0;
   line-height: 1.6;
   background-color: #f9f9f9;
   color: #333;
 }
 
-/* Header */
 header {
   background-color: #005f73;
-  color: white;
+  color: #fff;
   padding: 1rem;
-  text-align: center;
-}
-
-#course-title {
-  display: block;
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-}
-
-/* Navigation */
-nav {
   display: flex;
-  justify-content: center;
-  gap: 1.5rem;
+  justify-content: space-between;
+  align-items: center;
 }
 
-nav a {
-  color: white;
+header nav a {
+  color: #fff;
+  margin-left: 1rem;
   text-decoration: none;
-  font-weight: bold;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  transition: background 0.3s ease;
 }
 
-nav a:hover {
-  background: #0a9396;
+.columns-container {
+  display: flex;
+  gap: 2rem; /* space between left and right columns */
+  padding: 2rem;
+  flex-wrap: wrap; /* stack columns on small screens */
 }
 
-/* Main */
-main {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 0 1rem;
-  display: grid;
-  gap: 2rem;
+.left-column, .right-column {
+  flex: 1; /* columns share space equally */
+  min-width: 300px;
 }
 
-h1 {
-  text-align: center;
-  color: #005f73;
-}
-
+/* Left column cards */
 .card {
-  background: white;
+  background-color: #fff;
+  border-radius: 8px;
   padding: 1rem;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  display: grid;
-  gap: 1rem;
+  margin-bottom: 2rem; /* space between stacked cards */
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* space between text and image */
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.card.first {
+  flex-direction: row; /* text left, image right */
+}
+
+.card.second {
+  flex-direction: row-reverse; /* image left, text right */
 }
 
 .card img {
-  max-width: 100%;
+  max-width: 150px;
   border-radius: 8px;
+  object-fit: cover;
 }
 
-/* Footer */
+.section-header-box {
+  background-color: #0a9396;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.right-column {
+  background-color: #94d2bd;
+  padding: 1rem;
+  border-radius: 8px;
+  flex: 0.5;
+
+}
+
+.right-column h2 {
+  margin-top: 0;
+}
+
+.right-column ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.right-column li {
+  margin-bottom: 0.5rem;
+}
+
 footer {
   text-align: center;
   padding: 1rem;
-  background: #005f73;
-  color: white;
+  background-color: #005f73;
+  color: #fff;
   margin-top: 2rem;
 }
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+  .columns-container {
+    flex-direction: column;
+  }
+  .card {
+    flex-direction: column;
+    text-align: center;
+  }
+  .card.second {
+    flex-direction: column;
+  }
+  .card img {
+    max-width: 100%;
+  }
+}
+
+/* Header Title */
+#course-title {
+  display: block;
+  font-size: 2rem; /* larger title */
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+/* Navigation bar directly under title */
+header nav {
+  display: flex;
+  justify-content: center; /* center the links */
+  gap: 6rem; /* space between links */
+  background-color: black; /* black background for nav */
+  padding: 1rem 2rem 0;
+  margin: 0%;
+  border-radius: 5%;
+  width: 100vw; /* stretch nav full width */
+  box-sizing: border-box; /* include padding in width */
+}
+
+header nav a {
+  color: white;
+  font-size: 1.2rem; /* larger link text */
+  text-decoration: none;
+  padding: 0.5rem 1rem; /* extra click area */
+  transition: background-color 0.3s, color 0.3s;
+}
+
+header nav a:hover {
+  background-color: var(--accent-color);
+  color: var(--dark-text);
+  border-radius: 4px;
+}
+/* Second card: image left, text right */
+.card.second {
+  flex-direction: row; /* normal row: image left, text right */
+}
+.name-yellow {
+  color: rgb(135, 135, 55);
+  font-weight: bold; /* optional */
+}
+
