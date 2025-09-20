@@ -1,55 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WDD 131 – Dynamic Web Fundamentals – Zelalem Eshetu</title>
-    <meta name="description" content="WDD 131 – Dynamic Web Fundamentals by Zelalem Eshetu. Explore key concepts in dynamic web development, including HTML, CSS, JavaScript, and responsive design.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WDD 131 – Dynamic Web Fundamentals – Zelalem Eshetu</title>
+  <meta name="description" content="WDD 131 – Dynamic Web Fundamentals – Zelalem Eshetu. Course landing page with practice in HTML, CSS, and JavaScript.">
+  <meta name="author" content="Zelalem Eshetu Besha">
 
-  <!-- Reference external JS with defer -->
-  <script src="getdates.js" defer></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="styles/base.css">
+
+  <!-- JavaScript -->
+  <script src="scripts/getdates.js" defer></script>
 </head>
 <body>
-    <h1>WDD 131-Zelalem</h1>
-    <header>
-        <h1><span id="course-title">WDD 131 – Dynamic Web Fundamentals</span></h1>
+  <header>
+    <span id="course-title">WDD 131 – Dynamic Web Fundamentals</span>
+    <nav>
+      <a href="https://www.linkedin.com/" target="_blank">LinkedIn</a>
+      <a href="https://byupw.instructure.com/" target="_blank">Canvas</a>
+      <a href="https://www.churchofjesuschrist.org/study/scriptures/bofm/1-ne/3?lang=eng&id=p7#p7" target="_blank">Scripture</a>
+      <a href="#">Final Project</a>
+    </nav>
+  </header>
 
-<nav>
-  <ul>
-    <li><a href="https://www.linkedin.com/" target="_blank">linkedin</a></li>
-    <li><a href="https://www.byupw.instructure.com/" target="_blank">Canvas</a></li>
-    <li><a href="https://www.churchofjesuschrist.org/study/scriptures/bofm/1-ne/3?lang=eng&id=p7#p7">Scriptures</a></li>
-    <li><a href="#">Final Project Folder</a></li>
-  </ul>
-</nav>
+  <main>
+    <h1>Zelalem Eshetu</h1>
 
-    </header>
-
-    <main>
-        <h1>Zelalem Eshetu</h1>
     <section class="card">
-        <h2>About Me</h2>
-        <img src="images/about-me.jpeg" alt="About Me Image" width="300">
-        <p>Hello! I am Zelalem Eshetu, a student in WDD 131 – Dynamic Web Fundamentals. I am passionate about web development and learning new technologies.</p>
+      <h2>About Me</h2>
+      <img src="images/profile.jpg" alt="Your Profile Picture">
+      <p>My name is Zelalem Eshetu from Addis Ababa, Ethiopia. I have a background in teaching and management with a degree in Pure Mathematics and a master’s in Project Planning and Management. I’m currently studying Software Development at BYU-Idaho. I enjoy learning, helping others, and worshipping through songs. I speak Oromiffa, Amharic, and English fluently.</p>
     </section>
-        <section class="card">
-        <h2>Favorite Projects</h2>
-        <img src="images/projects.png" alt="Projects Image" width="300">
-        <p>These are some of my favorite projects completed during the course, showcasing HTML, CSS, and JavaScript skills.</p>
-        </section>
-    </main>
-    <footer>
-    <!-- First paragraph with dynamic year -->
-    <p>
-        &copy; <span id="currentyear"></span> Zelalem Eshetu. Ethiopia.
-    </p>
 
-    <!-- Second paragraph for last modified date -->
+    <section class="card">
+      <h2>My Favorite Things</h2>
+      <img src="images/favorite.jpg" alt="Something You Like">
+      <p>I enjoy worshipping through songs, reading books, and watching movies. My faith is very important to me, and I especially love music that inspires and uplifts me.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>© <span id="currentyear"></span> Zelalem Eshetu, Ethiopia</p>
     <p id="lastModified"></p>
-</footer>
-
+  </footer>
 </body>
 </html>
