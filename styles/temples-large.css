@@ -1,0 +1,27 @@
+@media screen and (min-width: 768px) {
+  /* Keep hamburger visible on all screens */
+  #menu {
+    display: block; /* changed from none */
+  }
+
+  /* Show nav horizontally only when "open" class is added */
+  #nav-menu {
+    display: none; /* keep hidden until hamburger clicked */
+    flex-direction: row;
+    gap: 20px;
+  }
+
+  #nav-menu.open {
+    display: flex; /* shows menu when hamburger clicked */
+  }
+
+  #nav-menu li {
+    border: none;
+  }
+
+  /* Album grid -> multiple columns */
+  .album {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
