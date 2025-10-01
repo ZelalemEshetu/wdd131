@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ethiopia Country Page</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/scripts.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>Country Page: Ethiopia</h1>
+    <nav>
+      <a href="#">Home</a>
+      <a href="#">Culture</a>
+      <a href="#">Food</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <picture>
+        <source srcset="images/lalibela-large.webp" media="(min-width: 800px)">
+        <img src="images/lalibela-small.webp" alt="Lalibela Rock-Hewn Church in Ethiopia">
+      </picture>
+    </section>
+
+    <section class="weather">
+      <h2>Weather <span class="icon">⛅</span></h2>
+      <p>Temperature: <span id="temp">8</span> °C</p>
+      <p>Wind Speed: <span id="wind">10</span> km/h</p>
+      <p>Wind Chill: <span id="chill"></span></p>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; <span id="year"></span> | Last Modified: <span id="lastModified"></span></p>
+  </footer>
+</body>
+</html>

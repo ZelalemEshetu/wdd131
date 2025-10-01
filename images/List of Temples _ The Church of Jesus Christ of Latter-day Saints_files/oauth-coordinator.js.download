@@ -1,0 +1,571 @@
+/***************************
+ * Create an oauth banner to be displayed on all pages in the lower lanes
+ *
+ * options; object
+ * - logoutUrl; string, url: 
+ * - isSignedInUrl; string, url: 
+ * - userSignedIn:
+ * - authentication; string: whether any authentication is required for the current page
+ * - loginUrl; string, url: 
+ * - context; string: application context or mode; e.g., 'preview', 'published'
+ * - debug; object
+ *   - enabled; boolean: debug mode is enabled
+ * - appPublicRoot; string: base path for application's public path
+ *   
+ *
+ * Bootstrapping example:
+ *
+ * <script id="oauth-coordinator-loader" class="oauth-coordinator" src="/temples/static/oauth-coordinator-client/js/oauth-coordinator.js"></script>
+ * <script>
+ *   oauthBanner({
+ *     logoutUrl: '${resLocals?.auth?.urls?.logout}',
+ *     isSignedInUrl: '${resLocals?.auth?.urls?.isSignedIn}',
+ *     userSignedIn: '${!!resLocals?.userSignedIn}',
+ *     authentication: '${resLocals?.authentication}',
+ *     loginUrl: '${resLocals?.auth?.urls?.login}',
+ *     context: '${resLocals?.context}',
+ *     debug: ${JSON.stringify(debug)},
+       appPublicRoot: `/temples/static`, 
+ *   })
+ * </script>
+ *
+ */
+
+var oauthCoordinator = ({
+	logoutUrl,
+	isSignedInUrl,
+	userSignedIn,
+	authentication,
+	loginUrl,
+	context,
+	debug,
+  appPublicRoot,
+}) => {
+
+  // only output logger.log() statements if debug is 
+	const logger = debug?.enabled ? console : { log: () => {}, warn: () => {}, error: () => {} };
+
+	/***************************
+   * Determine which browsers support fetch calls with mode: "no-cors" (return opaque responses)
+   */
+  const userBrowser = {
+    chrome: /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor),
+    safari: /^((?!chrome|android).)*safari/i.test(navigator.userAgent),
+  }
+  userBrowser.supportsModeNoCors = userBrowser.chrome || userBrowser.safari
+  
+	/***************************
+   * Get emoji for given event type
+   * - if oauth-banner.js is available, actualy emojis should be pulled from there
+   * - else, the key values should be used instead
+   * - this is, of course, only relevant in the lower "non-secure" lanes
+   *
+   * arguments
+   * - eventType; string: (see "Dictionary of event type emojis"; oauth-banner.js)
+   *
+   * returns
+   * - string, emoji
+   */
+  const eventTypeEmoji = (eventType) => {
+    const eventTypeEmojis = (typeof EVENT_TYPE_EMOJIS !== 'undefined') ? EVENT_TYPE_EMOJIS : {}
+    return eventTypeEmojis[eventType] || eventType
+  }
+
+	/***************************
+   * Create html code from string
+   *
+   * arguments
+   * - str; string: html code represented as a string; must have a single root note
+   *
+   * returns
+   * - element: element that is ready to be injected into the document DOM
+   */
+  function createElementFromString(str) {
+    const element = new DOMParser().parseFromString(str, 'text/html');
+    const child = element.documentElement.querySelector('body').firstChild;
+    return child;
+  };
+
+	/***************************
+   * Make general AJAX service request
+   *
+   * arguments
+   * - url; string, url
+   * - options; object
+   *   - requestOptions; object
+   *   - warn; string: custom warning message if AJAX request fails; else use a generic message
+   *   - throwError; boolean: if an error is caught, throw error if true, else log and return null; defaults to true
+   *   - logErrors; boolean: if an error is caught, log error if true, else just return null; defaults to true
+   */
+	const fetchRequest = async (url, options={}) => {
+    const { warn, requestOptions: altRequestOptions={} } = options
+    const throwError = !options.hasOwnProperty("throwError") || !!options.throwError
+    const logErrors = !options.hasOwnProperty("logErrors") || !!options.logErrors
+
+		const requestOptions = {
+			method: "GET",
+			headers: {
+				Accept: "application/json",
+			},
+			redirect: "follow",
+      ...altRequestOptions,
+		};
+
+		try {
+      const fetchArgs = [url, requestOptions]
+			const response = await fetch(...fetchArgs);
+
+			if (!response.ok) {
+
+        // detect and handle opaque responses
+        const isOpaqueResponse = (requestOptions.mode === 'no-cors' && response.type === 'opaque' && response.status === 0)
+        const responseType = (isOpaqueResponse) ? 'opaque-response' : 'response'
+        const responsePayload = {type: responseType, response}
+
+        if (userBrowser.supportsModeNoCors && isOpaqueResponse) return responsePayload
+
+        // any other status besides one that is "ok" or opaque responses should throw
+        logger.log("response status is not 200/ok and browser does not support requests with mode: 'no-cors'", response, fetchArgs)
+				throw responsePayload;
+			}
+
+			return await response.json();
+
+		} catch (error) {
+      const message = warn || "unable to fetch content"
+      if (logErrors) logger.warn(message, error);
+
+      if (throwError) throw error
+      return null
+		}
+	};
+
+  /***************************
+   *  event handler; Handle the 'message' events coming from oauth-client-iframe
+   *  - events must come from the same origin in order to be handled
+   *  - TODO: should probably add appliation path (e.g., /temples) as well
+   *  - should be removed before destroying the iframe
+   *  
+   * arguments
+   *  event:
+   *    data:
+   *      request: 
+   *        data: 
+   *          cmd; string: command requested by the iframe child
+   *  
+   *  supported commands
+   *  - logged-in
+   *    - once the command is received, emit event to update user state
+   *    - user state includes the oauth banner content as well as role-based content
+   */
+  const handleIframeMessages = (event) => {
+    if ( document.location.origin === event.origin ) {
+      logger.log("iframe -> parent: message received", JSON.stringify(event.data))
+
+      switch(event.data?.request?.data?.cmd) {
+        case 'logged-in': {
+          logger.log("publish user state updates and remove oauth client iframe")
+
+          // TODO: patch up
+          // if (iframe) removeOauthClientIframe()
+
+          updateUserState({ updateSignedIn: {oath: false}, eventType: 'logged-in' })
+          
+          break;
+        }
+      }
+    }
+  }
+  
+  // subscribe to 'message' events
+  window.addEventListener("message", handleIframeMessages);
+
+  /***************************
+   * Remove one html element from it's parent
+   *
+   * arguments
+   * - parent; element: 
+   * - child; element: 
+   * - options
+   *   - throwError; boolean: if an error is caught, throw error if true, else log and return null; defaults to true
+   */
+  const removeElement = (parent, child, options={}) => {
+    const throwError = !options.hasOwnProperty("throwError") || !!options.throwError
+    try {
+      parent.removeChild(child)
+    } catch(error) {
+      if (throwError) throw error
+      else logger.warn("child was already removed from parent?")
+    }
+  }
+
+  /***************************
+   * Add oauth-client-iframe to DOM
+   * - expose the iframe when debug.enabled is set to true
+   * - should only be visible when in use for login purposes
+   */
+  const addIframeToDom = (label) => {
+    // variables
+    // documentBody; element: handle for <body>; used when appending/adding the iframe element to the dom
+    //
+    const documentBody = document.querySelector('body')
+    
+    const iframeStyle = (debug?.enabled) ? 'width: 100%; height: 200px;' : 'width: 0; height; 0; display: none;'
+    const html = `
+      <iframe id="oauth-client-iframe-${label}" data-label="${label}" class="oauth-client-iframe" src="${appPublicRoot}/oauth-client-iframe.html?appPublicRoot=${appPublicRoot}" style="${iframeStyle}"></iframe>
+    `
+    const iframe = createElementFromString(html)
+    documentBody.appendChild(iframe)
+    return iframe
+  }
+
+  /***************************
+   * event handler; Handle the 'load' event for iframe
+   *
+   * arguments
+   * - iframeWindow; window: handle used when making calls using sendMessage to the iframe child
+   */
+  const handleIframeLoadedHandlers = {}
+  const handleIframeLoaded = (iframe) => {
+    const iframeWindow = iframe.contentWindow
+
+    // extract label from iframe; use to identify target iframe and event handler
+    const label = iframe.getAttribute('data-label')
+
+    handleIframeLoadedHandlers[label] = () => {
+      logger.log("iframe window has been loaded")
+
+      let request
+      if (label === 'login') {
+        request = { request: { data: {cmd: label, loginUrl: `${loginUrl}?context=${context}`} } }
+      } else if (label === 'logout') {
+        request = { request: { data: {cmd: label, loginUrl: `${loginUrl}?context=${context}`} } }
+      }
+
+      iframeWindow.postMessage(request, "*");
+    }
+
+    return handleIframeLoadedHandlers[label]
+  }
+
+  /***************************
+   * Remove the oauth client iframe from the page
+   * - removes event listeners attached or associated with the iframe
+   * - searches for orphaned oauth client iframe elements and removes them if possible
+   * - removes `iframe` and sets its value to null
+   */
+  const removeOauthClientIframe = (iframe) => {
+
+    // extract label from iframe; use to identify target iframe and event handler
+    const label = iframe.getAttribute('data-label')
+
+    // remove event listener
+    try {
+      const handler = handleIframeLoadedHandlers[label]
+      iframe.removeEventListener("load", handler);
+    } catch(error) {
+      logger.warn("unable to remove 'load' event listener for iframe")
+    }
+    
+    // attempt to remove oauth iframe
+    try {
+      removeElement(documentBody, iframe, {throwError: true})
+    } catch(error) {
+      logger.warn("iframe was already removed?")
+    }
+
+    // check for any orphaned oauth iframe elements and remove them
+    const orphanedOauthClientIframeElements = Array.from(document.querySelectorAll(`.oauth-client-iframe[data-label="${label}"]`))
+    if (orphanedOauthClientIframeElements.length > 0) {
+      logger.warn("(oauth-coordinator.js, , trace 1:127) orphaned oauth client iframe elements were found; cleaning them up", orphanedOauthClientIframeElements)
+      orphanedOauthClientIframeElements.forEach(iframe => {
+        removeElement(documentBody, iframe )
+      })
+    }
+
+    // remove event listener
+    window.removeEventListener("message", handleIframeMessages);
+
+    iframes[label] = null
+  }
+
+	/***************************
+   * Frames cache
+   * - currently there is only one
+   */
+  const iframes = {
+    login: null,
+  }
+
+	/***************************
+   * Create an iframe to assist with creating an applications session
+   * - if the user has an Okta session, this may be called to automatically create an applications session for the user
+   * - browser security prevents simply calling the login endpoint using fetch
+   * - should be removed before destroying the iframe
+   *
+   * variables
+   * - iframe; element: represents the oauth-client-iframe iframe
+   */
+  const createOauthClientIframe = (label) => {
+    const iframe = iframes[label]
+
+    // the oauth client iframe should be a singleton
+    if (!!iframe) {
+      logger.warn("oauth-client-iframe already exists; not creating another one")
+      return false
+    }
+
+    const eventType = (label === 'login') ? 'logged-in' : 'logged-out'
+    logger.log(`createOauthClientIframe; app: ${eventTypeEmoji(eventType)}`)
+
+    iframes[label] = addIframeToDom(label)
+
+    // subscribe to 'load' events for the iframe
+    iframes[label].addEventListener("load", handleIframeLoaded(frames[label]));
+  }
+
+  /***************************
+   * Create new application session
+   * - if a valid Okta session exists for the current browser
+   * - configured to make a one-way request (mode: "no-cors") with an opaque response
+   */ 
+	const createAppUserSession = async () => {
+    logger.log(`createAppUserSession; app: ${eventTypeEmoji('logged-in')}`)
+    return fetchRequest(`${loginUrl}?context=${context}`, {requestOptions: {
+        mode: "no-cors",
+      }, 
+      warn: "unable to sign the user in",
+      logErrors: debug?.enabled,
+    })
+	};
+
+  /***************************
+   * Destroy application session
+   * - configured to make a one-way request (mode: "no-cors") with an opaque response
+   */ 
+	const invalidateAppUserSessions = async () => {
+    logger.log(`invalidateAppUserSessions; app: ${eventTypeEmoji('logged-out')}`)
+    return fetchRequest(logoutUrl, {requestOptions: {
+        mode: "no-cors",
+      }, 
+      warn: "unable to sign the user out",
+      throwError: false,
+      logErrors: debug?.enabled,
+    })
+	};
+
+  /***************************
+   * Verify valid application session for the current user
+   */ 
+	const checkUserSignedIn = async () => {
+    logger.log("checkUserSignedIn")
+    return fetchRequest(isSignedInUrl, {
+      warn: "unable to check if user is signed in",
+      throwError: false,
+      logErrors: debug?.enabled,
+    })
+	};
+
+  /***************************
+   * Silently create an applications session
+   * - if a valid Okta session exists for the current browser
+   */ 
+  const silentSignIn = async () => {
+    // this should silently create an applications session for the current user
+    try {
+      logger.log("attempting fetch/no-cors solution to create session")
+      await createAppUserSession()
+
+    } catch(error) {
+      logger.log("unable to create session using fetch/no-cors; attempting iframe solution", error || null)
+      createOauthClientIframe('login')
+    }
+  }
+
+  /***************************
+   * Force the current user to create a new application session by signing in
+   */ 
+  const forceSignIn = () => {
+    logger.log(`authentication ${authentication}; force signin` )
+    window?.location.replace(
+      `${loginUrl}?context=${context}&redirect_url=${window.location}`
+    );
+  }
+
+  /***************************
+   * Force the platform service to refresh itself when okta session was
+   * invalidated by a service/process other than one from itself
+   */ 
+  const platformForceSignOut = () => {
+    try {
+      window.dispatchEvent(new CustomEvent("isloggedout"))
+      window.Platform.loggedin = false
+      document.querySelector('platform-header').shadowRoot.querySelector('global-profile-nav').shadowRoot.querySelector("#signInButton").style.removeProperty('display');
+      document.querySelector('platform-header').shadowRoot.querySelector('global-profile-nav').shadowRoot.querySelector("#signInMenu").style.removeProperty('display');
+    } catch(error) {
+      logger.warn(`Unable to force update for platform signout`)
+    }
+  }
+
+  /***************************
+   * Emit 'update-user-state' event.  Used to:
+   * - update oauth banner details
+   * - update role-based features without reloading the entire page
+   *
+   * arguments
+   * - payload; object: 
+   */ 
+  const updateUserState = (payload=null) => {
+    // notify event subscribers of the user's current state
+    // - role-based rendered content
+    // - oauth banner details
+    document.dispatchEvent(
+      new CustomEvent("update-user-state", {
+        detail: payload,
+      })
+    );
+  }
+
+	/***************************
+   * Handle messages received from oauth coordinator (op.churchofjesuschrist.org)
+   *
+   * arguments
+   * - providerPayload
+   *   - userId; string
+   *   - name; string: name of signed in user
+   *   - status; string: status of browser user; ACTIVE | INACTIVE | ANON | EXPIRED
+   *   - mfaActive; boolean
+   *   - expiresAt; date, utc: expiration timestamp for user's current session
+   *   - createdAt; date, utc: creation timestamp for user's current session
+   *   - loginDurationMillis; integer: number of milliseconds the user has been signed in
+   * - options
+   *   - customColor; string, emoji, optional: color to represent oauth coordinator status
+   * 
+   *   providerPayload payload e.g., 
+   *   {
+   *     "userId": "00u1xoupocaKL8MX2357",
+   *     "name": "Dave Vezzani",
+   *     "status": "ACTIVE",
+   *     "mfaActive": true,
+   *     "expiresAt": "2024-11-05T22:50:51.000Z",
+   *     "createdAt": "2024-11-05T21:50:47.000Z",
+   *     "loginDurationMillis": 4163,
+   *     "customColor": eventTypeEmoji('active'),
+   *   }
+   *   
+   *   options payload e.g., 
+   *   {
+   *     "customColor": eventTypeEmoji('active')
+   *   }
+   */
+	const syncProviderAndAppUserSessions = async (providerPayload, options={}) => {
+		const user = await checkUserSignedIn();
+    const { eventType } = options || {}
+
+    // collect data
+		const compareSignedInState = {
+			provider: providerPayload?.status === "ACTIVE",
+			app: !!user?.isSignedIn,
+			static: !!userSignedIn,
+			authentication,
+		};
+
+		// Actions to take after receiving message notifications from the session coordinator
+    //
+    // okta: INACTIVE
+    // - no valid Okta session exists (reported by op.churchofjesuschrist.org)
+    // - user should be signed out
+    // - if the current page requires authentication, user should be forced to sign in
+		if (compareSignedInState.hasOwnProperty('provider') && !compareSignedInState?.provider) {
+
+			// without effecting performance/user-experience, quietly invalidate user sessions for next navigation action
+      if (compareSignedInState.app) {
+        logger.log(`compareSignedInState; app: ${eventTypeEmoji('active')}, okta: ${eventTypeEmoji('inactive')}` )
+        await invalidateAppUserSessions();
+      } else {
+        logger.log(`compareSignedInState; app: ${eventTypeEmoji('inactive')}, okta: ${eventTypeEmoji('inactive')}` )
+      }
+
+      // if the page requires authentication, force the user to sign in
+			if (compareSignedInState.authentication === "required") {
+        if (eventType === 'logged-out') setTimeout(() => { forceSignIn(); }, 5000)
+        else forceSignIn()
+      } else {
+        platformForceSignOut()
+      }
+
+    // app: INACTIVE, okta: ACTIVE
+    // - valid Okta session exists
+    // - no application session exists
+    // - user should be signed in
+		} else if (compareSignedInState.hasOwnProperty('app') && !compareSignedInState?.app) {
+      logger.log(`compareSignedInState; app: ${eventTypeEmoji('inactive')}, okta: ${eventTypeEmoji('active')}` )
+
+      // this should silently create an applications session for the current user
+      await silentSignIn()
+    }
+
+    // notify event subscribers of the user's current state
+    updateUserState({ ...providerPayload, eventType })
+	};
+
+	/***************************
+   * Handler controller for messages sent from op.churchofjesuschrist.org
+   *
+   * arguments
+   * - event; object, Event
+   * - options; object
+   *   - color; string, emoji, optional: color to represent oauth coordinator status
+   */
+	const sessionCoordinatorEventHandler = async (event, options) => {
+		logger.log("oauth-coordinator-events: user session status", event?.detail?.status);
+
+			// provider: providerPayload?.status === "ACTIVE",
+      // EXPIRED
+      // ANON
+      // ACTIVE
+    
+    if (event?.detail?.status === "EXPIRED") options = {...options, eventType: 'expired'}
+		await syncProviderAndAppUserSessions(event?.detail, options);
+	};
+
+	/***************************/
+  // subscribe to op.churchofjesuschrist.org events
+
+	const handleLoggedIn = (event) => {
+		logger.log("oauth-coordinator-events: user logged in", event);
+		sessionCoordinatorEventHandler(event, {eventType: 'logged-in'}); // LOGGED-IN
+	};
+  
+	const handleLoggedOut = (event) => {
+		logger.log("oauth-coordinator-events: user logged out", event);
+    // TODO: remove
+		sessionCoordinatorEventHandler(event, {eventType: 'logged-out'}); // LOGGED-OUT
+	};
+
+	const handleSessionExpired = (event) => {
+		logger.log("oauth-coordinator-events: user session expired", event);
+		sessionCoordinatorEventHandler(event, {eventType: 'expired'}); // EXPIRED
+	};
+
+	const handleUserInfo = async (event) => {
+		logger.log("oauth-coordinator-events: userinfo", event);
+		sessionCoordinatorEventHandler(event);
+	};
+
+	const handleForceLogin = async (event) => {
+		logger.log("app-events: forceLogin", event);
+    forceSignIn()
+	};
+
+	document.addEventListener("userloggedin", handleLoggedIn, false);
+	document.addEventListener("userloggedout", handleLoggedOut, false);
+	document.addEventListener("sessionexpired", handleSessionExpired, false);
+	document.addEventListener("userinfo", handleUserInfo, false);
+	document.addEventListener("forceLogin", handleForceLogin, false);
+
+  // createOauthClientIframe()
+  
+  // log the oauth coordinator was loaded
+	console.log("oauth-coordinator loaded")
+};
