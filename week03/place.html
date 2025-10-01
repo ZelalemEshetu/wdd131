@@ -12,12 +12,13 @@
     <h1>Country Page: Ethiopia</h1>
     <nav>
       <a href="#">Home</a>
-      <a href="#">Culture</a>
-      <a href="#">Food</a>
+      <a href="#culture">Culture</a>
+      <a href="#food">Food</a>
     </nav>
   </header>
 
   <main>
+    <!-- Hero -->
     <section class="hero">
       <picture>
         <source srcset="images/lalibela-large.webp" media="(min-width: 800px)">
@@ -25,11 +26,33 @@
       </picture>
     </section>
 
+    <!-- Weather -->
     <section class="weather">
       <h2>Weather <span class="icon">⛅</span></h2>
+      <img class="weather-mobile-icon" src="images/cloud.png" alt="Cloudy weather" />
       <p>Temperature: <span id="temp">8</span> °C</p>
       <p>Wind Speed: <span id="wind">10</span> km/h</p>
       <p>Wind Chill: <span id="chill"></span></p>
+    </section>
+
+    <!-- Culture -->
+    <section id="culture" class="info">
+      <h2>Culture</h2>
+      <p>
+        Ethiopia is one of the oldest nations in the world with a rich history, traditions, and 
+        diverse cultural heritage. It is known for its music, dance, coffee ceremonies, and being 
+        home to more than 80 ethnic groups.
+      </p>
+    </section>
+
+    <!-- Food -->
+    <section id="food" class="info">
+      <h2>Food</h2>
+      <p>
+        Ethiopian cuisine is famous for dishes like <em>injera</em> (flat sourdough bread), 
+        <em>doro wat</em> (spicy chicken stew), and a variety of lentil and vegetable dishes. 
+        Meals are often shared from a large plate, emphasizing community and togetherness.
+      </p>
     </section>
   </main>
 

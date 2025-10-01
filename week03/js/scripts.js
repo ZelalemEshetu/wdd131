@@ -1,21 +1,31 @@
-// Footer dates
-document.getElementById("year").textContent = new Date().getFullYear();
-document.getElementById("lastModified").textContent = document.lastModified;
+// Footer: current year and last modified
+document.addEventListener("DOMContentLoaded", () => {
+  const yearSpan = document.getElementById("year");
+  const lastModifiedSpan = document.getElementById("lastModified");
 
-// Weather data
-const temp = parseFloat(document.getElementById("temp").textContent);
-const wind = parseFloat(document.getElementById("wind").textContent);
+  const now = new Date();
+  yearSpan.textContent = now.getFullYear();
+  lastModifiedSpan.textContent = document.lastModified;
 
-// Wind chill formula (Celsius)
-function calculateWindChill(t, s) {
-  return (
-    13.12 + 0.6215 * t - 11.37 * Math.pow(s, 0.16) + 0.3965 * t * Math.pow(s, 0.16)
-  ).toFixed(1);
-}
+  // Weather values
+  const temp = parseFloat(document.getElementById("temp").textContent);
+  const wind = parseFloat(document.getElementById("wind").textContent);
+  const chillSpan = document.getElementById("chill");
 
-// Apply conditions
-let chill = "N/A";
-if (temp <= 10 && wind > 4.8) {
-  chill = calculateWindChill(temp, wind) + " °C";
-}
-document.getElementById("chill").textContent = chill;
+  // Calculate Wind Chill (Celsius formula)
+  function calculateWindChill(t, v) {
+    return (
+      13.12 +
+      0.6215 * t -
+      11.37 * Math.pow(v, 0.16) +
+      0.3965 * t * Math.pow(v, 0.16)
+    ).toFixed(1);
+  }
+
+  // Conditions for valid wind chill
+  if (temp <= 10 && wind > 4.8) {
+    chillSpan.textContent = calculateWindChill(temp, wind) + " °C";
+  } else {
+    chillSpan.textContent = "N/A";
+  }
+});
