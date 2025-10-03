@@ -1,12 +1,13 @@
 :root {
-  --green: #078930;
-  --yellow: #fcd116;
-  --bg-color: #f5f5f5;
-  --text-color: #333;
-  --red: #e12026;
+  --green: #078930;       /* headings and header/nav links */
+  --yellow: #b58900;      /* highlights only, not normal text */
+  --red: #e12026;         /* section headings and important highlights */
+  --bg-color: #f5f5f5;    /* page background */
+  --text-color: #222;      /* normal text, passes AA contrast */
+  --white: #ffffff;        /* white text on colored backgrounds */
 }
 
-
+/* Reset */
 * {
   margin: 0;
   padding: 0;
@@ -24,6 +25,8 @@ body {
 header {
   text-align: center;
   padding: 1rem;
+  background-color: var(--green);
+  color: var(--white);  /* strong contrast on header */
 }
 
 nav {
@@ -33,12 +36,12 @@ nav {
 nav a {
   margin: 0 0.75rem;
   text-decoration: none;
-  color: var(--green);
+  color: var(--white);  /* changed from green for contrast on header */
   font-weight: bold;
 }
 
 nav a:hover {
-  color: var(--red);
+  color: var(--yellow);  /* okay for hover, readable */
 }
 
 /* Hero image */
@@ -52,6 +55,7 @@ nav a:hover {
 /* Weather section */
 .weather {
   background-color: var(--yellow);
+  color: var(--text-color); /* black text for contrast on yellow */
   padding: 1rem;
   text-align: center;
   margin: 1rem auto;
@@ -74,7 +78,8 @@ nav a:hover {
 
 /* Info sections (Culture & Food) */
 .info {
-  background-color: white;
+  background-color: var(--white);
+  color: var(--text-color); /* ensure contrast on white background */
   padding: 1.5rem;
   margin: 1rem auto;
   border-radius: 8px;
@@ -83,7 +88,7 @@ nav a:hover {
 }
 
 .info h2 {
-  color: var(--red);
+  color: var(--red);  /* good contrast on white */
   margin-bottom: 0.5rem;
 }
 
@@ -92,7 +97,7 @@ footer {
   text-align: center;
   padding: 1rem;
   background-color: var(--green);
-  color: white;
+  color: var(--white);  /* strong contrast */
   margin-top: 2rem;
 }
 
@@ -101,5 +106,33 @@ footer {
   .weather {
     width: 50%;
     margin: 2rem auto;
+  }
+}
+
+/* Hide SVG by default (desktop) */
+.weather-mobile-icon {
+  display: none;
+}
+
+/* Show SVG only on mobile */
+@media (max-width: 799px) {
+  .weather-mobile-icon {
+    display: inline-block;
+    width: 50px;   /* adjust size if needed */
+    height: 50px;
+  }
+
+  /* Hide emoticon on mobile */
+  .weather h2 .icon::after {
+    content: "";
+  }
+}
+
+/* Desktop view: show emoticon */
+@media (min-width: 800px) {
+  .weather h2 .icon::after {
+    content: "⛅";
+    font-size: 1.5rem;
+    margin-left: 0.5rem;
   }
 }
