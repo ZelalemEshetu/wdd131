@@ -3,34 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Temple Album</title>
+  <title>Temple Album | Zelalem Eshetu</title>
   <link rel="stylesheet" href="styles/temples.css">
   <link rel="stylesheet" href="styles/temples-large.css">
-  <script src="scripts/temples.js" defer></script>
+  <script defer src="scripts/temples.js"></script>
 </head>
 <body>
+  <!-- HEADER -->
   <header>
     <h1>Temple Album</h1>
-    <!-- Hamburger button with accessibility label -->
-    <button id="menu" aria-label="Toggle navigation">&#9776;</button>
-    
-     
-    <!-- Navigation menu --->
-    <nav>
-      <ul id="nav-menu">
-      <li><a href="#">Home</a></li>
-      <li><a href="#">Old</a></li>
-      <li><a href="#">New</a></li>
-      <li><a href="#">Large</a></li>
-      <li><a href="#">Small</a></li>
-      </ul>
+
+    <!-- Hamburger button for all screens -->
+    <button id="hamburger" aria-label="Toggle navigation">&#9776;</button>
+
+    <!-- Navigation menu -->
+    <nav id="nav-menu">
+      <a href="#">Home</a>
+      <a href="#">Old Temples</a>
+      <a href="#">New Temples</a>
+      <a href="#">Large View</a>
+      <a href="#">Small View</a>
     </nav>
   </header>
 
+  <!-- MAIN CONTENT -->
   <main>
-    <h2>Temples</h2>
-    <section class="album">
-
+    <h2>Temple Gallery</h2>
+    <div class="album-container">
       <figure>
         <img src="images/London England Temple.jpeg" alt="London England Temple">
         <figcaption>London England Temple</figcaption>
@@ -48,8 +47,8 @@
         <figcaption>Colonia Juárez Chihuahua Mexico Temple</figcaption>
       </figure>
       <figure>
-        <img src="images/Los Angeles Calfornia Temple.jpeg" alt="Los Angeles Calfornia Temple">
-        <figcaption>Los Angeles Calfornia Temple</figcaption>
+        <img src="images/Los Angeles Calfornia Temple.jpeg" alt="Los Angeles California Temple">
+        <figcaption>Los Angeles California Temple</figcaption>
       </figure>
       <figure>
         <img src="images/Columbus Ohio Temple.jpeg" alt="Columbus Ohio Temple">
@@ -71,12 +70,14 @@
         <img src="images/Rome Temple.jpeg" alt="Rome Temple">
         <figcaption>Rome Temple</figcaption>
       </figure>
-    </section>
+    </div>
   </main>
 
+  <!-- FOOTER -->
   <footer>
     <p>&copy; <span id="year"></span> | Zelalem Eshetu</p>
-    <p>Last Modified: <span id="lastModified"></span></p>
+    <p>Last modified: <span id="last-modified"></span></p>
   </footer>
 </body>
 </html>
+
