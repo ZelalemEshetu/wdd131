@@ -26,8 +26,8 @@ header h1 {
   font-size: 1.5rem;
 }
 
-/* Hamburger button */
-#menu {
+/* Hamburger button visible on all screens */
+#hamburger {
   font-size: 1.5rem;
   background: none;
   border: none;
@@ -36,32 +36,27 @@ header h1 {
   display: block;
 }
 
-/* Nav menu hidden on mobile */
+/* Nav menu hidden by default */
 #nav-menu {
   display: none;
   flex-direction: column;
-  list-style: none;
-  padding: 0;
-  margin: 0;
+  gap: 10px;
 }
 
-#nav-menu li {
-  padding: 10px 0;
-  border-top: 1px solid #ccc;
-}
-
-#nav-menu li a {
+#nav-menu a {
   color: white;
   text-decoration: none;
   font-weight: bold;
+  padding: 10px 0;
+  display: block;
 }
 
-#nav-menu li a:hover {
+#nav-menu a:hover {
   color: #ffcc00;
 }
 
 /* ========== MAIN ALBUM ========== */
-.album {
+.album-container {
   display: grid;
   grid-template-columns: 1fr; /* 1 column on mobile */
   gap: 20px;
@@ -70,7 +65,7 @@ header h1 {
   padding: 0 10px;
 }
 
-.album figure {
+.album-container figure {
   background-color: white;
   padding: 10px;
   border-radius: 5px;
@@ -78,7 +73,7 @@ header h1 {
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.album figure img {
+.album-container figure img {
   width: 100%;
   height: auto;
   border-radius: 5px;
